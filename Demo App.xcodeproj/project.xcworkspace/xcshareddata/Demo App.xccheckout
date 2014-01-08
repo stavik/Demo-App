@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1B79FA18-AAD2-4FBD-9E18-A38DB2EE53A3</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Demo App</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>9E846C52-AA5B-4D32-95E7-4009FE0833CB</key>
+		<string>https://github.com/stavik/Demo-App/trunk</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Demo App.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>9E846C52-AA5B-4D32-95E7-4009FE0833CB</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+		<key>9E846C52-AA5B-4D32-95E7-4009FE0833CB</key>
+		<string>https://github.com/stavik/Demo-App</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/stavik/Demo-App/trunk/Demo%20App.xcodeproj</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>9E846C52-AA5B-4D32-95E7-4009FE0833CB</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryBranchesRelativeLocationKey</key>
+			<string>branches</string>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlRepositoryTrunkRelativeLocationKey</key>
+			<string>trunk</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>9E846C52-AA5B-4D32-95E7-4009FE0833CB</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Demo-App-gitHub</string>
+		</dict>
+	</array>
+</dict>
+</plist>

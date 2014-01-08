@@ -72,12 +72,12 @@
     
     // TODO refresh indicator funguje nějak divně
     
-    /*
+
     if ((self.pocetRefreshAktualizaci > 0) && !self.refreshControl.refreshing) {
         
         [self.refreshControl beginRefreshing];
 
-        [self.tableView setContentOffset:CGPointMake(0, -100) animated:YES];
+//        [self.tableView setContentOffset:CGPointMake(0, -100) animated:YES];
         
     } else {
         
@@ -92,7 +92,7 @@
         NSLog (@"Pocet refresh aktualizaci: %i", self.pocetRefreshAktualizaci);
     
 #endif
-    */
+    
 }
 
 - (void) didStartFetching:(id)sender {
