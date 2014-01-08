@@ -48,6 +48,13 @@
     
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+ 
+    [textField resignFirstResponder];
+    
+    return NO;
+
+}
 
 - (IBAction)sliderChanged:(id)sender {
     

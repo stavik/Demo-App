@@ -72,7 +72,7 @@
     
     // TODO refresh indicator funguje nějak divně
     
-    
+    /*
     if ((self.pocetRefreshAktualizaci > 0) && !self.refreshControl.refreshing) {
         
         [self.refreshControl beginRefreshing];
@@ -92,7 +92,7 @@
         NSLog (@"Pocet refresh aktualizaci: %i", self.pocetRefreshAktualizaci);
     
 #endif
-    
+    */
 }
 
 - (void) didStartFetching:(id)sender {
@@ -389,7 +389,15 @@
     
     cell.detailTextLabel.font = [UIFont systemFontOfSize:12.0];
     
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"Tweetů s GPS: %i\n od: %@\n do: %@",[topic.tweets count], [formatter stringFromDate:[topic getOldestTweet].date], [formatter stringFromDate:[topic getNewestTweet].date] ];
+    NSString* oldestTweetDate = [formatter stringFromDate:[topic getOldestTweet].date];
+    NSString* newestTweetDate = [formatter stringFromDate:[topic getNewestTweet].date];
+    
+    if (!oldestTweetDate) oldestTweetDate = @"";
+    if (!newestTweetDate) newestTweetDate = @"";
+    
+    
+    
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"Tweetů s GPS: %i\n od: %@\n do: %@",[topic.tweets count], oldestTweetDate, newestTweetDate];
     
         
 }

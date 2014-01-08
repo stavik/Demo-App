@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8F034183187D01140083BC63 /* DetailViewController in Resources */ = {isa = PBXBuildFile; fileRef = 8F034182187D01130083BC63 /* DetailViewController */; };
 		8F0BEA921879F4B700D3E9F6 /* GeoLocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F0BEA911879F4B700D3E9F6 /* GeoLocator.m */; };
 		8F3BE3C618792B0300764ADA /* Tweet.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F3BE3C518792B0300764ADA /* Tweet.m */; };
 		8F3BE3CF1879347A00764ADA /* AddTopicVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F3BE3CE1879347A00764ADA /* AddTopicVC.m */; };
@@ -65,7 +64,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8F034182187D01130083BC63 /* DetailViewController */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = DetailViewController; path = "../../Demo App/DetailViewController"; sourceTree = "<group>"; };
 		8F0BEA901879F4B600D3E9F6 /* GeoLocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeoLocator.h; sourceTree = "<group>"; };
 		8F0BEA911879F4B700D3E9F6 /* GeoLocator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeoLocator.m; sourceTree = "<group>"; };
 		8F3BE3C418792B0200764ADA /* Tweet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tweet.h; sourceTree = "<group>"; };
@@ -242,7 +240,6 @@
 				8FA3A3D81877092D005256D5 /* MasterViewController.m */,
 				8FA3A3DA1877092D005256D5 /* DetailViewController.h */,
 				8FA3A3DB1877092D005256D5 /* DetailViewController.m */,
-				8F034182187D01130083BC63 /* DetailViewController */,
 				8FA3A3DD1877092D005256D5 /* Images.xcassets */,
 				8FA3A3D41877092D005256D5 /* Test_Cora_Data.xcdatamodeld */,
 				8FA3A411187718BB005256D5 /* Model */,
@@ -403,7 +400,6 @@
 			files = (
 				8FA3A3DE1877092D005256D5 /* Images.xcassets in Resources */,
 				8FA3A3CA1877092C005256D5 /* InfoPlist.strings in Resources */,
-				8F034183187D01140083BC63 /* DetailViewController in Resources */,
 				8FA3A3D31877092D005256D5 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
