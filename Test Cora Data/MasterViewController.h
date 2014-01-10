@@ -16,6 +16,8 @@
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 
--(void) addNewTopicWithName: (NSString* )name initialTweetCount: (int)count ;
+- (void) addNewTopicWithName: (NSString* )name initialTweetCount: (int)count ;
+- (void) backgroundRefreshDataWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler ;
+
 
 @end

@@ -1,18 +1,13 @@
 //
-//  Topic.m
+//  ProgressView.h
 //  Demo App
 //
 //  Created by Vojtěch Šťavík on 09/01/14.
 //  Copyright (c) 2014 VojtechStavik.cz. All rights reserved.
 //
 
-#import "Topic.h"
-#import "Tweet.h"
+#import <UIKit/UIKit.h>
 
-
-@implementation Topic
-
-@dynamic name;
-@dynamic tweets;
+@interface ProgressView : UIView
 
 @end

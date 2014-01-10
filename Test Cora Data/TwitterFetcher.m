@@ -12,7 +12,7 @@
 #import "Tweet+Doplnky.h"
 #import "AppDelegate.h"
 #import <CoreLocation/CoreLocation.h>
-
+#import "Location+Doplnky.h"
 
 
 
@@ -37,6 +37,19 @@
 @end
 
 @implementation TwitterFetcher
+
+
+- (void) setPocetPozadovanychTweetu:(int)pocetPozadovanychTweetu {
+    
+    // chova se jako static
+    
+    if (! _pocetPozadovanychTweetu) {
+        
+        _pocetPozadovanychTweetu = pocetPozadovanychTweetu;
+        
+    }
+    
+}
 
 
 + (TwitterFetcher *) getTwitterFetcher {
@@ -73,6 +86,35 @@
     
 }
 
+- (void) nastavitPocetPozadovanychTweetu: (int) pocet {
+    
+    // pokud je refresh, musime pocet novych tweetu odhadnout kvuli progress indicatoru
+    
+    if (self.isRefresh) {
+        
+        // kvuli ukazateli postupu odhadneme pocet novych tweetu na zaklade uz ulozenych tweetu
+        
+        NSTimeInterval time = [[self.topic getNewestTweet].date timeIntervalSinceDate:[self.topic getOldestTweet].date];
+        
+        int prumeryPocetTweetuZaTimeInterval = [self.topic.tweets count] / time;
+        
+        
+        NSTimeInterval intervalOdPosledniAktulizace = [[NSDate date] timeIntervalSinceDate:[self.topic getNewestTweet].date];
+        
+        int odhad = (int) intervalOdPosledniAktulizace * prumeryPocetTweetuZaTimeInterval;
+        
+        if (odhad < 1) odhad = 1;
+        
+        self.pocetPozadovanychTweetu = odhad;
+
+    }
+    
+    else
+        
+        self.pocetPozadovanychTweetu = pocet;
+
+}
+
 
 - (void)getTweetsForTopic:(Topic *)newTopic count:(NSInteger)count refresh:(BOOL)refresh {
     
@@ -80,10 +122,8 @@
     
     
     [self.delegate didStartFetching:self];
-    
-    
+
     self.topic = newTopic;
-    self.pocetPozadovanychTweetu = count;
     self.pocetAktualnePozadovanychTweetu = 0;
     self.pocetNahranychTweetu = 0;
     self.jsouTweety = YES;
@@ -91,17 +131,9 @@
 
     long long int sinceID = 0;
     
-#ifdef DEBUG
+    [self nastavitPocetPozadovanychTweetu: count];
     
-    
-    if (self.isRefresh) {
-        
-        NSLog(@"Nejnovejsi ID %llu", [[self.topic getNewestTweet].id longLongValue]);
-        NSLog(@"Nejnovejsi ID %llu", [[self.topic getOldestTweet].id longLongValue]);
-        
-    }
 
-#endif
     
     
     // priprava autorizacniho tokenu
@@ -167,8 +199,15 @@
     
     if (self.pocetAktualnePozadovanychTweetu > MAX_POCET_TWEETU) self.pocetAktualnePozadovanychTweetu = MAX_POCET_TWEETU;
     
-    if (self.isRefresh) self.pocetAktualnePozadovanychTweetu = MAX_POCET_TWEETU;
+    
+    
+    if (self.isRefresh) {
+        
+        self.pocetAktualnePozadovanychTweetu = MAX_POCET_TWEETU;
 
+    }
+    
+    
     
     if (!sinceID && !maxID) {
         // nacteme vsechny pozadovane tweety
@@ -189,13 +228,7 @@
     }
     
     
-#ifdef DEBUG
-    
-    // debug
-    
-    NSLog (@"Už načteno: %i     Aktuálně požadováno: %i      z celkových: %i",[self.nahraneTweety count], self.pocetAktualnePozadovanychTweetu, self.pocetPozadovanychTweetu);
-    
-#endif
+
     
     
     
@@ -232,6 +265,7 @@
         return;
     }
     
+    
     NSArray* tweety = [tweets valueForKeyPath:@"statuses"];
     
     int pocet = [tweety count];
@@ -258,11 +292,12 @@
         long long int id = [[t objectForKey:@"id_str"] longLongValue];
         
         
+
         
         // testujeme, jestli už je objekt v DB (vrací nil)  , pokud ano, končíme aktualizaci, protoze uz nejsou zadne nove tweety
         
         Tweet* newTweet = [Tweet newTweetWithID:id InManagedObjectContext:context];
-        
+      
         if (newTweet) {
         
             __block NSDate *detectedDate;
@@ -275,53 +310,81 @@
                                     usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
              { detectedDate = result.date; }];
             
-            
-            newTweet.date = detectedDate;
-            newTweet.text = [t objectForKey:@"text"];
-            
-            
             NSDictionary* userInfo = [t objectForKey:@"user"];
             
+            newTweet.text = [t objectForKey:@"text"];
+            
+            newTweet.date = detectedDate;
+
             newTweet.user = [userInfo objectForKey:@"name"];
-            newTweet.location = [userInfo objectForKey:@"location"];
+            
             newTweet.imageURL = [userInfo objectForKey:@"profile_image_url"];
+
+  
             
-/*
-             NSLog (@"\n\nPridan novy Tweet: \n");
-             NSLog(newTweet.date.description);
-             //     NSLog(newTweet.imageURL);
-             
-             if ([newTweet.location isEqualToString:@""]) {
-             
-             NSLog(@"Lokace není");
-             
-             } else {
-             NSLog(@"Lokace: %@", newTweet.location);
-             
-             }
-             
-             NSLog(newTweet.text);
-             NSLog(newTweet.user);
-             NSLog(@"%lli",[newTweet.id longLongValue]);
-             
-*/
+            // pokud existuji GPS tweetu, rovnou je pridame, vytvorime novou Location, jmeno je ID tweetu
             
+            if (![[t objectForKey:@"coordinates"] isKindOfClass:[NSNull class]])
+            
+            {  NSDictionary* coordinates = [t objectForKey:@"coordinates"];
+            
+            if (coordinates) {
+                
+                NSArray* GPS = [coordinates objectForKey:@"coordinates"];
+                
+                if (GPS) {
+                    
+                    NSString* longitude = [GPS[0] description];
+                    NSString* latitude = [GPS[1] description];
+                    
+                    float fLongitude = [longitude floatValue];
+                    float fLatitude = [latitude floatValue];
+                    
+                    Location* lokace = [Location getNewLocationForString:[NSString stringWithFormat:@"%lli", id] inContext:context];
+                    
+                    
+                    
+                    lokace.longitude = [NSNumber numberWithFloat:fLongitude];
+                    lokace.latitude = [NSNumber numberWithFloat:fLatitude];
+                    
+                    newTweet.location = lokace;
+
+                    NSLog(@"Rozpoznány GPS souřadnice %f %f",[newTweet.location.longitude floatValue] , [newTweet.location.latitude floatValue]);
+                    
+                    }
+                
+                }
+                
+            } else {
+                
+                // přidáme lokaci na základě uživatelsky vyplněné lokace
+                                
+                NSString* locationName = [userInfo objectForKey:@"location"];
+                
+                newTweet.location = [Location getNewLocationForString:locationName inContext:context];
+                
+            }
             
             [self.nahraneTweety addObject:newTweet];   // pole s nove stazenymi tweety, muze se lisit od vsech tweetu, pokud jen probiha aktualizace
+            
 
-#ifdef DEBUG
+            dispatch_async(dispatch_get_main_queue(), ^{
+               
+                [self.delegate numberOfDownloadedTweetsChanged:[self.nahraneTweety count] initialCount:self.pocetPozadovanychTweetu];
             
-            // debug
+            });
+
             
-            NSLog (@"Pocet nove stazenych tweetu pro tema %@ je :%i", self.topic.name,[self.nahraneTweety count]);
-            
-#endif
+
+
             
         }
         
         else {
             
             self.jsouTweety = NO;
+            
+            // tweet je uz v DB, zadne dalsi nove nejsou
             
         }
     }
@@ -345,7 +408,11 @@
     
     if (self.jsouTweety && (self.pocetNahranychTweetu < self.pocetPozadovanychTweetu)) {
         
+        NSLog(@"Tweety jeste jsou, pocet nahranych: %i   pocet pozadovanych: %i", self.pocetNahranychTweetu, self.pocetPozadovanychTweetu);
+        
+       
             [self loadTweetsSinceID:0 maxID:[nejstarsiNovyTweet.id longLongValue] - 1];
+
             
             return;
     }
@@ -356,15 +423,20 @@
     
     if (self.isRefresh && self.jsouTweety) {
         
+        
         [self loadTweetsSinceID:[[self.topic getNewestTweet].id longLongValue] maxID:[nejstarsiNovyTweet.id longLongValue] - 1]; // -1 znamena do daneho tweetu
+
         
         return;
         
     }
+        
+
     
     [self finish];
     
 }
+
 
 - (void) finish {
   
@@ -377,24 +449,6 @@
     
     [self.delegate didFinishFetching:self];
 
-    
-#ifdef DEBUG
-    
-    
-    NSLog (@"Nejmladsi tweet:%@", [self.topic getNewestTweet].date.description);
-    
-    NSLog (@"Nejstarsi tweet:%@",  [self.topic getOldestTweet].date.description);
-
-    
-    
-    Tweet* nejstarsiNovyTweet = [self.nahraneTweety firstObject];
-    Tweet* nejmladsiNovyTweet = [self.nahraneTweety lastObject];
-    
-    NSLog (@"Nejmladsi novy tweet:%@", nejmladsiNovyTweet.date.description);
-    
-    NSLog (@"Nejstarsi novy tweet:%@",  nejstarsiNovyTweet.date.description);
-
-#endif
     
 }
 

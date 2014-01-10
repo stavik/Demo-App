@@ -14,6 +14,9 @@
 
 
 - (void) didFinishFetching: (id) sender;
+
+- (void) numberOfDownloadedTweetsChanged:(int) numberOfDownloadedTweets initialCount: (int) initialCount;
+
 - (void) didStartFetching: (id) sender;
 
 @end

@@ -11,11 +11,15 @@
 #import "MasterViewController.h"
 #import "AFNetworkActivityLogger.h"
 #import "AFNetworkActivityIndicatorManager.h"
+#import "Topic+Doplnky.h"
+#import "TopicRefreshController.h"
 
 
 
 
-@implementation AppDelegate
+
+
+@implementation AppDelegate 
 
 @synthesize managedObjectContext = _managedObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
@@ -29,6 +33,14 @@
     controller.managedObjectContext = self.managedObjectContext;
  
 
+
+    
+// background fetching
+    
+    [[UIApplication sharedApplication] setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    
+    
+    
     
 //    [[AFNetworkActivityLogger sharedLogger] startLogging];
     
@@ -37,6 +49,18 @@
  
     return YES;
 }
+
+- (void) application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    
+    NSLog(@"Starting background fetch");
+    
+    
+    MasterViewController* mvc = (MasterViewController *) [(UINavigationController *)self.window.rootViewController viewControllers][0];
+    
+    [mvc backgroundRefreshDataWithCompletionHandler:completionHandler];
+    
+}
+
 							
 - (void)applicationWillResignActive:(UIApplication *)application
 {
@@ -60,6 +84,9 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

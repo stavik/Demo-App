@@ -11,6 +11,8 @@
 #import "Tweet+Doplnky.h"
 #import "Topic+Doplnky.h"
 #import "AFNetworking.h"
+#import "Location+Doplnky.h"
+#import "TweetDetailViewController.h"
 
 @interface DetailViewController () <MKMapViewDelegate>
 
@@ -20,16 +22,25 @@
 @property (strong, nonatomic) IBOutlet UISlider *slider;
 @property (strong, nonatomic) IBOutlet UILabel *dateLabel;
 
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 - (void)configureView;
 @end
 
 @implementation DetailViewController
 
+- (void) viewDidLoad {
 
-- (void) viewWillAppear:(BOOL)animated {
+    [super viewDidLoad];
     
-    [super viewWillAppear:animated];
+    [self configureView];
+    
+    self.mapView.delegate=self;
+        
+    MKCoordinateRegion zoomRegion = MKCoordinateRegionMake(CLLocationCoordinate2DMake(50.0755381, 14.43780049999998), MKCoordinateSpanMake(90, 180)); // Praha
+    
+    MKCoordinateRegion adjustedRegion = [self.mapView regionThatFits:zoomRegion];
+    [self.mapView setRegion:adjustedRegion animated:NO];
     
     NSDate* date = [self.topic getOldestTweet].date;
     
@@ -39,32 +50,89 @@
     self.dateLabel.text = [formatter stringFromDate:date];
     
     
-    NSArray* test = self.tweetsForDates;  // jen kvůli rychlejší inicializaci
+    [self inicializaceTweetu];
+    
+}
+
+- (void) viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
+    
 
     
-    
-#ifdef DEBUG
-    
-    /////// debug - vypis vsech tweetu
-    
-    [self.topic printSortedTweets];
+}
 
-#endif
+- (void) viewDidAppear:(BOOL)animated {
+    
+    [super viewDidAppear:animated];
+    
+}
+
+- (void) inicializaceTweetu {
+    
+    [self.activityIndicator startAnimating];
+    
+    self.slider.enabled = NO;
+    
+    
+    dispatch_async(dispatch_queue_create ("cz.vojtechstavik.demoapp.nacitanitweetu", NULL), ^{
+    
+    
+    NSMutableArray* mutableTweetsForDates = [[NSMutableArray alloc] initWithCapacity:100];
+    
+    
+    // i<100 protoze mame 101 datumu, ale mezi nima jen 99 funkcnich intervalu
+    
+    for (int i = 0; i < 100; i++) {
+        
+        NSDate* thisDate = self.dates[i];
+        NSDate* nextDate = self.dates[i+1];
+        
+        NSMutableArray* annotations = [[NSMutableArray alloc] init];
+        
+        for (Tweet* tweet in self.topic.tweets) {
+            
+            NSDate* tweetDate = [tweet date];
+            
+            
+            if  (([thisDate compare:tweetDate] == NSOrderedAscending) || ([thisDate compare:tweetDate] == NSOrderedSame) )
+                
+                if (([tweetDate compare:nextDate] == NSOrderedAscending) || ([tweetDate compare:nextDate] == NSOrderedSame))
+                    
+                    if (! ([tweet.location.longitude floatValue] == 0 || [tweet.location.latitude floatValue] == 0))  // tweet ktery jeste neprosel geolokaci nepridavame
+                        
+                        [annotations addObject:tweet];
+            
+        }
+        
+        
+        [mutableTweetsForDates addObject:[annotations copy]];
+        
+    }
+    
+    self.tweetsForDates = [mutableTweetsForDates copy];
+        
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            
+            [self.activityIndicator stopAnimating];
+            
+            self.slider.enabled = YES;
+            
+            self.slider.value = 1;
+            
+            [self valueChanged:self.slider];
+            
+        });
+    
+    });
+    
     
     
     
 }
 
-
 - (IBAction)valueChanged:(id)sender {
     
-#ifdef DEBUG
-    
-    // debug
-    
-    NSLog(@"Hodnota slideru: %i", (int)self.slider.value);
-    
-#endif
     
     BOOL jeStejne = YES;
    
@@ -87,16 +155,6 @@
         [self.mapView addAnnotations:self.tweetsForDates[(int)self.slider.value]]; // pridame nove, ktere odpovidaji zvolenemu datumu
         
     
-    } else {
-        
-#ifdef DEBUG
-        
-        // debug
-        
-        NSLog (@"Stejne anotace");
-        
-#endif
-
     }
     
         
@@ -112,6 +170,7 @@
     
 }
 
+
 - (NSArray *) dates {
     
     // cas mezi nejstarsim a nejmladsim tweetem rozdelime na 99 intervalu (slider ma 99 kroku)
@@ -123,20 +182,7 @@
         NSDate* dateOfOldestTweet = [self.topic getOldestTweet].date;
         NSDate* dateOfNewestTweet = [self.topic getNewestTweet].date;
         
-#ifdef DEBUG
-
-        // debug
-        
-        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"hh:mm   dd.MM.yyyy"];
-        
-        NSLog(@"Nejstarsi tweet: %@", [formatter stringFromDate:dateOfOldestTweet]);
-        NSLog(@"Nejnovejsi tweet: %@", [formatter stringFromDate:dateOfNewestTweet]);
-        
-        
-        ///
-#endif
-        
+       
         
         NSTimeInterval time = [dateOfNewestTweet  timeIntervalSinceDate:dateOfOldestTweet];
         
@@ -148,12 +194,7 @@
             
             [mutableDates addObject:newDate];
             
-#ifdef DEBUG
-            
-            // debug
-            
-            NSLog(@"Pridano datum: %@", [formatter stringFromDate:newDate]);
-#endif
+
             
         }
         
@@ -166,58 +207,7 @@
 
 
 
-- (NSArray*) tweetsForDates {
-    
-    // pole s tweety pro jednotlivá data. Tweety by šlo filtrovat i dynamicky, ale můžou jich být i tisíce, takže to radši udělám jen jednou pro všechny datumy
-    
-    if (!_tweetsForDates) {
-        
-        NSMutableArray* mutableTweetsForDates = [[NSMutableArray alloc] initWithCapacity:100];
-       
-        
-        // i<100 protoze mame 101 datumu, ale mezi nima jen 99 funkcnich intervalu
-        
-        for (int i = 0; i < 100; i++) {
-            
-            NSDate* thisDate = self.dates[i];
-            NSDate* nextDate = self.dates[i+1];
 
-            NSMutableArray* annotations = [[NSMutableArray alloc] init];
-            
-            for (Tweet* tweet in self.topic.tweets) {
-                
-                NSDate* tweetDate = [tweet date];
-                
-                
-                if  (([thisDate compare:tweetDate] == NSOrderedAscending) || ([thisDate compare:tweetDate] == NSOrderedSame) )
-                    
-                    if (([tweetDate compare:nextDate] == NSOrderedAscending) || ([tweetDate compare:nextDate] == NSOrderedSame))
-                        
-                        [annotations addObject:tweet];
-            
-            }
-            
-            
-            [mutableTweetsForDates addObject:[annotations copy]];
-
-            
-#ifdef DEBUG
-            
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"hh:mm   dd.MM.yyyy"];
-            NSLog(@"Počet tweetů pro klíč: %i datum: %@ je %i",i, [formatter stringFromDate:self.dates[i]], [annotations count]);
-#endif
-            
-            
-        }
-    
-        _tweetsForDates = [mutableTweetsForDates copy];
-        
-    }
-    
-    return _tweetsForDates;
-    
-    }
 
 
 
@@ -271,6 +261,10 @@
         
         if (tweet) {
             
+            UIButton *disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+            
+            view.rightCalloutAccessoryView = disclosureButton;
+            
             NSURL *imageURL = [NSURL URLWithString:tweet.imageURL];
             
             NSURLRequest* urlRequest = [NSURLRequest requestWithURL:imageURL];
@@ -294,9 +288,37 @@
 
 }
 
+- (void) mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control {
+    
+    [self performSegueWithIdentifier:@"ShowDetailOfTweet" sender:view];
+    
+}
 
 
-#pragma mark - Managing the detail item
+#pragma mark - Segue
+
+- (void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    
+    if ([sender isKindOfClass:[MKAnnotationView class]]) {
+   
+    
+        MKAnnotationView* view = (MKAnnotationView *)sender;
+    
+        if ([[segue identifier] isEqualToString:@"ShowDetailOfTweet"]) {
+        
+            if ([segue.destinationViewController isKindOfClass:[TweetDetailViewController class]]) {
+            
+                TweetDetailViewController* tdvc = (TweetDetailViewController* )segue.destinationViewController;
+            
+                tdvc.tweet = view.annotation;
+                tdvc.userPhoto = ((UIImageView *)view.leftCalloutAccessoryView).image;
+                
+            }
+        }
+        
+    }
+    
+}
 
 
 
@@ -305,15 +327,7 @@
 
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-    [self configureView];
-    
-    self.mapView.delegate=self;
 
-}
 
 - (void)didReceiveMemoryWarning
 {

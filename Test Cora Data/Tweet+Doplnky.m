@@ -7,6 +7,7 @@
 //
 
 #import "Tweet+Doplnky.h"
+#import "Location+Doplnky.h"
 #import "AppDelegate.h"
 
 @implementation Tweet (Create)
@@ -34,17 +35,16 @@
             newTweet = [NSEntityDescription insertNewObjectForEntityForName:@"Tweet"
                                                      inManagedObjectContext:context];
             newTweet.id = [NSNumber numberWithLongLong:tweetID];
-            newTweet.latitude = 0;
-            newTweet.longitude = 0;
             
         } else {
             
             // pokud uz tweet v DB je, vracíme nil
-  
+            
+            // TODO - co kdyz by byl jeden tweet pro 2 temata? Je potreba osetrit aktualizace atd.
+            
             
             newTweet = nil;
             
-            // newTweet = [matches lastObject];
         }
     }
     
@@ -55,18 +55,10 @@
 
 - (void) deleteThisTweet {
 
-    AppDelegate* delegate = [[UIApplication sharedApplication] delegate];
-    
-    NSManagedObjectContext* context = [delegate managedObjectContext];
-    
+    NSManagedObjectContext* context = self.managedObjectContext;
     
     NSString* stringID = [NSString stringWithFormat:@"%lli",[self.id longLongValue]];
     
-    if ([stringID isEqualToString:@"0"]) {
-        
-        NSLog(@"Nejaka chybka ktery zatim nerozumim");
-        
-    }
    
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
     request.predicate = [NSPredicate predicateWithFormat:@"id = %@", stringID];
@@ -83,13 +75,9 @@
                 NSLog(@"Tweet nelze smazat protože není v DB :)");
         
     } else {
+   
         [context deleteObject:[matches lastObject]];
         
-#ifdef DEBUG
-        
-        NSLog(@"Tweet smazán");
-        
-#endif
         
     }
     
@@ -109,7 +97,7 @@
 
 - (CLLocationCoordinate2D) coordinate {
     
-    return CLLocationCoordinate2DMake([self.latitude floatValue], [self.longitude floatValue]);
+    return CLLocationCoordinate2DMake([self.location.latitude floatValue], [self.location.longitude floatValue]);
     
 }
 

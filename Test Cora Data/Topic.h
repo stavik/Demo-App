@@ -1,8 +1,8 @@
 //
 //  Topic.h
-//  Test Cora Data
+//  Demo App
 //
-//  Created by Vojtěch Šťavík on 07/01/14.
+//  Created by Vojtěch Šťavík on 09/01/14.
 //  Copyright (c) 2014 VojtechStavik.cz. All rights reserved.
 //
 
@@ -25,4 +25,3 @@
 - (void)removeTweets:(NSSet *)values;
 
 @end
-

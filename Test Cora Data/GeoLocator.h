@@ -11,13 +11,14 @@
 #import "Topic+Doplnky.h"
 #import "AppDelegate.h"
 #import <CoreLocation/CoreLocation.h>
+#import "Location+Doplnky.h"
 
 @class GeoLocator;
 
 @protocol GeoLocatorDelegate <NSObject>
 
-- (void) didFinishGeolocation: (GeoLocator *) sender;
-- (void) geolocationWillStart: (GeoLocator *) sender;
+- (void) didFinishGeolocationTask: (GeoLocator *) sender;
+- (void) geolocationWillStart: (GeoLocator *) sender count:(int) numberOfTweetsToGeolocate;
 
 @end
 

@@ -86,6 +86,9 @@
 
 - (void) printSortedTweets {
     
+    // jen pro potreby debugu
+    
+    
     NSArray* tweets = [NSArray arrayWithArray:[self.tweets allObjects]];
     
     tweets = [self sortTweets:tweets];
@@ -99,11 +102,11 @@
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
         [formatter setDateFormat:@"hh:mm   dd.MM.yyyy"];
 
-#ifdef DEBUG
+
         
          NSLog (@"Tweet c.%lli má datum:%@",[t.id longLongValue],[formatter stringFromDate:t.date]);
         
-#endif
+
         
     }
     
